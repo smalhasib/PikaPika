@@ -1,7 +1,7 @@
 package com.hasib.pikapika.data.remote
 
-import com.hasib.pikapika.data.remote.response.Pokemon
-import com.hasib.pikapika.data.remote.response.PokemonList
+import com.hasib.pikapika.data.remote.response.PokemonDetailsDto
+import com.hasib.pikapika.data.remote.response.PokemonListDto
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
@@ -12,10 +12,14 @@ interface PokemonApi {
     suspend fun getPokemonList(
         @Query("limit") limit: Int,
         @Query("offset") offset: Int
-    ): PokemonList
+    ): PokemonListDto
 
     @GET("pokemon/{name}")
     suspend fun getPokemonInfo(
         @Path("name") name: String
-    ): Pokemon
+    ): PokemonDetailsDto
+
+    companion object {
+        const val BASE_URL = "https://pokeapi.co/api/v2/"
+    }
 }

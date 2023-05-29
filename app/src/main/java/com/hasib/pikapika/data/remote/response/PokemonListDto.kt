@@ -1,6 +1,6 @@
 package com.hasib.pikapika.data.remote.response
 
-data class PokemonList(
+data class PokemonListDto(
     val count: Int,
     val next: String,
     val previous: Any,

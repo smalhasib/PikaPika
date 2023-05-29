@@ -58,7 +58,7 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.hasib.pikapika.R
-import com.hasib.pikapika.data.remote.response.Pokemon
+import com.hasib.pikapika.data.remote.response.PokemonDetailsDto
 import com.hasib.pikapika.data.remote.response.Type
 import com.hasib.pikapika.util.Resource
 import com.hasib.pikapika.util.parseStatToAbbr
@@ -76,9 +76,10 @@ fun PokemonDetailScreen(
     pokemonImageSize: Dp = 200.dp,
     viewModel: PokemonDetailViewModel = hiltViewModel()
 ) {
-    val pokemonInfo = produceState<Resource<Pokemon>>(initialValue = Resource.Loading()) {
-        value = viewModel.getPokemonInfo(pokemonName)
-    }.value
+    val pokemonDetailsDtoInfo =
+        produceState<Resource<PokemonDetailsDto>>(initialValue = Resource.Loading()) {
+            value = viewModel.getPokemonInfo(pokemonName)
+        }.value
 
     Box(
         modifier = Modifier
@@ -96,7 +97,7 @@ fun PokemonDetailScreen(
                 )
         )
         PokemonDetailStateWrapper(
-            pokemonInfo = pokemonInfo,
+            pokemonDetailsDtoInfo = pokemonDetailsDtoInfo,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(
@@ -121,14 +122,14 @@ fun PokemonDetailScreen(
                 )
         )
         Box(contentAlignment = TopCenter, modifier = Modifier.fillMaxSize()) {
-            if (pokemonInfo is Resource.Success) {
-                pokemonInfo.data?.sprites?.let {
+            if (pokemonDetailsDtoInfo is Resource.Success) {
+                pokemonDetailsDtoInfo.data?.sprites?.let {
                     AsyncImage(
                         model = ImageRequest.Builder(LocalContext.current)
                             .data(it.front_default)
                             .crossfade(true)
                             .build(),
-                        contentDescription = pokemonInfo.data.name,
+                        contentDescription = pokemonDetailsDtoInfo.data.name,
                         modifier = Modifier
                             .size(pokemonImageSize)
                             .offset(y = topPadding)
@@ -167,20 +168,20 @@ fun PokemonDetailTopSection(
 
 @Composable
 fun PokemonDetailStateWrapper(
-    pokemonInfo: Resource<Pokemon>,
+    pokemonDetailsDtoInfo: Resource<PokemonDetailsDto>,
     modifier: Modifier = Modifier,
     loadingModifier: Modifier = Modifier
 ) {
-    when (pokemonInfo) {
+    when (pokemonDetailsDtoInfo) {
         is Resource.Success -> {
             PokemonDetailSection(
-                pokemonInfo = pokemonInfo.data!!,
+                pokemonDetailsDtoInfo = pokemonDetailsDtoInfo.data!!,
                 modifier = modifier.offset(y = (-20).dp)
             )
         }
 
         is Resource.Error -> {
-            Text(text = pokemonInfo.message!!, color = Color.Red, modifier = modifier)
+            Text(text = pokemonDetailsDtoInfo.message!!, color = Color.Red, modifier = modifier)
         }
 
         is Resource.Loading -> {
@@ -194,7 +195,7 @@ fun PokemonDetailStateWrapper(
 
 @Composable
 fun PokemonDetailSection(
-    pokemonInfo: Pokemon,
+    pokemonDetailsDtoInfo: PokemonDetailsDto,
     modifier: Modifier = Modifier
 ) {
     val scrollState = rememberScrollState()
@@ -206,8 +207,8 @@ fun PokemonDetailSection(
             .verticalScroll(scrollState)
     ) {
         Text(
-            text = "#${pokemonInfo.id} ${
-                pokemonInfo.name.replaceFirstChar {
+            text = "#${pokemonDetailsDtoInfo.id} ${
+                pokemonDetailsDtoInfo.name.replaceFirstChar {
                     if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString()
                 }
             }",
@@ -216,12 +217,12 @@ fun PokemonDetailSection(
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurface
         )
-        PokemonTypeSection(types = pokemonInfo.types)
+        PokemonTypeSection(types = pokemonDetailsDtoInfo.types)
         PokemonDetailDataSection(
-            pokemonWeight = pokemonInfo.weight,
-            pokemonHeight = pokemonInfo.height
+            pokemonWeight = pokemonDetailsDtoInfo.weight,
+            pokemonHeight = pokemonDetailsDtoInfo.height
         )
-        PokemonBaseStats(pokemonInfo = pokemonInfo)
+        PokemonBaseStats(pokemonDetailsDtoInfo = pokemonDetailsDtoInfo)
     }
 }
 
@@ -355,17 +356,17 @@ fun PokemonStat(
 
 @Composable
 fun PokemonBaseStats(
-    pokemonInfo: Pokemon,
+    pokemonDetailsDtoInfo: PokemonDetailsDto,
     animDelayPerItem: Int = 100
 ) {
     val maxBaseStat = remember {
-        pokemonInfo.stats.maxOf { it.base_stat }
+        pokemonDetailsDtoInfo.stats.maxOf { it.base_stat }
     }
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(text = "Base stats:", fontSize = 20.sp, color = MaterialTheme.colorScheme.onSurface)
         Spacer(modifier = Modifier.height(4.dp))
-        for (i in pokemonInfo.stats.indices) {
-            val stat = pokemonInfo.stats[i]
+        for (i in pokemonDetailsDtoInfo.stats.indices) {
+            val stat = pokemonDetailsDtoInfo.stats[i]
             PokemonStat(
                 stateName = parseStatToAbbr(stat),
                 statValue = stat.base_stat,

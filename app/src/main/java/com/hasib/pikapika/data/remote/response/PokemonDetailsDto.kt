@@ -1,6 +1,6 @@
 package com.hasib.pikapika.data.remote.response
 
-data class Pokemon(
+data class PokemonDetailsDto(
     val abilities: List<Ability>,
     val base_experience: Int,
     val forms: List<Form>,
